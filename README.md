@@ -12,7 +12,7 @@ BetterGradient is a small test-bed for generating better looking gradients by co
 
 ### Based on
 
-Currently uses the Chrome.js library for proof of concept. Final versions (Photoshop, Unity, GIMP, etc) will be based on different code.
+Currently uses the [Chrome.js](https://github.com/gka/chroma.js) library for proof of concept. Final versions (Photoshop, Unity, GIMP, etc) will be based on different code.
 
 
 ### Author
