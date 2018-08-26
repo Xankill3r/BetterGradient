@@ -1,6 +1,6 @@
 # BetterGradient
 
-BetterGradient is a small test-bed for generating better looking gradients by converting to the HCL colorspace. It may eventually be utilized within Unity3D, GIMP, Krita, Photoshop, etc.
+BetterGradient is a small test-bed for generating better looking gradients by converting to the HCL colorspace. It may eventually be used as a plugin within Unity3D, GIMP, Krita, Photoshop, etc.
 
 ### Usage
 
