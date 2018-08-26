@@ -5,8 +5,8 @@
         <title>Xankill3r/BetterGradient</title>
         <style>
             .label {
-                display: block;
-                margin-right: 10px;
+                width: 120px;
+                text: bold;
             }
             canvas {
                 border-style: solid;
@@ -37,25 +37,66 @@
             }
             function compareColors(ev) {
                 var x = ev.clientX - 10;
-                var rgb = rgbScaler(x / 400.0).hex();
-                var lrgb = rgbLinScaler(x / 400.0).hex();
-                var lch = lchScaler(x / 400.0).hex();
-                console.log(rgb + " " + lrgb + " " + lch);
+                var rect = ev.target.getBoundingClientRect();
+                x -= rect.left;
+                var rgb = rgbScaler(x / 400.0);
+                var lrgb = rgbLinScaler(x / 400.0);
+                var lch = lchScaler(x / 400.0);
+                document.getElementById("g1rgb").innerHTML = arr3ToString(rgb.rgb());
+                document.getElementById("g1lch").innerHTML = arr3ToString(rgb.lch());
+                document.getElementById("g2rgb").innerHTML = arr3ToString(lrgb.rgb());
+                document.getElementById("g2lch").innerHTML = arr3ToString(lrgb.lch());
+                document.getElementById("g3rgb").innerHTML = arr3ToString(lch.rgb());
+                document.getElementById("g3lch").innerHTML = arr3ToString(lch.lch());
+            }
+            function arr3ToString(arr) {
+                var n1 = +arr[0].toFixed(2);
+                var n2 = +arr[1].toFixed(2);
+                var n3 = +arr[2].toFixed(2);
+                return n1 + ", " + n2 + ", " + n3;
             }
         </script>
     </head>
     <body onload="updateGradient()">
         <div id="header"></div>
         <div id="content">
-            <div id="inputs">
-                <p><div class="label">Color 1</div><input id="c1" value="#ffff00" type="color" onchange="updateGradient()"/></p>
-                <p><div class="label">Color 2</div><input id="c2" value="#00ffff" type="color" onchange="updateGradient()"/></p>
-            </div>
-            <div id="outputs">
-                <p><div class="label">RGB Gradient</div><canvas id="gradient1" width="400" height="40" onpointermove="compareColors(event)"></canvas></p>
-                <p><div class="label">lRGB Gradient</div><canvas id="gradient2" width="400" height="40" onpointermove="compareColors(event)"></canvas></p>
-                <p><div class="label">Lch Gradient</div><canvas id="gradient3" width="400" height="40" onpointermove="compareColors(event)"></canvas></p>
-            </div>
+            <table id="inputs">
+                <tr>
+                    <td class="label">Color 1</td>
+                    <td><input id="c1" value="#ffff00" type="color" onchange="updateGradient()"/></td>
+                </tr>
+                <tr>
+                    <td class="label">Color 2</td>
+                    <td><input id="c2" value="#00ffff" type="color" onchange="updateGradient()"/></td>
+                </tr>
+            </table>
+            <br/>
+            <table id="outputs">
+                <tr>
+                    <th>Style</th>
+                    <th>Gradient</th>
+                    <th width="150px">RGB</th>
+                    <th width="150px">LCH</th>
+                </tr>
+                <tr>
+                    <td class="label">RGB Gradient</td>
+                    <td><canvas id="gradient1" width="400" height="40" onpointermove="compareColors(event)"></canvas></td>
+                    <td id="g1rgb"></td>
+                    <td id="g1lch"></td>
+                </tr>
+                <tr>
+                    <td class="label">lRGB Gradient</td>
+                    <td><canvas id="gradient2" width="400" height="40" onpointermove="compareColors(event)"></canvas></td>
+                    <td id="g2rgb"></td>
+                    <td id="g2lch"></td>
+                </tr>
+                <tr>
+                    <td class="label">Lch Gradient</td>
+                    <td><canvas id="gradient3" width="400" height="40" onpointermove="compareColors(event)"></canvas></td>
+                    <td id="g3rgb"></td>
+                    <td id="g3lch"></td>
+                </tr>
+            </table>
         </div>
     </body>
 </html>
