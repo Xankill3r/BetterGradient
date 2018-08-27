@@ -4,7 +4,7 @@ BetterGradient is a small test-bed for generating better looking gradients by co
 
 ### Usage
 
-* Download the test.html file and open it in your browser.
+* Download the [test.html](https://github.com/Xankill3r/BetterGradient/archive/master.zip) file and open it in your browser.
 
 * Simply choose the colors by clicking on the boxes and three sets of gradients will get generated - RGB, linear RGB and LCH.
 
