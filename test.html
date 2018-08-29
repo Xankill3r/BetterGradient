@@ -42,7 +42,7 @@
                     subtleLchCtx.fillRect(i, 0, 1, 80);
                     labCtx.fillStyle = labScaler(i / 400.0).hex();
                     labCtx.fillRect(i, 0, 1, 80);
-                    avgCtx.fillStyle = chroma.mix(lchCtx.fillStyle, rgbCtx.fillStyle, 0.5).hex();
+                    avgCtx.fillStyle = chroma.mix(lchCtx.fillStyle, rgbCtx.fillStyle, 0.5, "lab").hex();
                     avgCtx.fillRect(i, 0, 1, 80);
                 }
             }
@@ -99,7 +99,7 @@
                 var lch = lchScaler(x / 400.0);
                 var subtle = subtleLch(lchScaler, x / 400.0);
                 var lab = labScaler(x / 400.0);
-                var avg = chroma.mix(lch.hex(), rgb.hex(), 0.5);
+                var avg = chroma.mix(lch.hex(), rgb.hex(), 0.5, "lch");
                 document.getElementById("g1rgb").innerHTML = arr3ToString(rgb.rgb());
                 document.getElementById("g1lch").innerHTML = arr3ToString(rgb.lch());
                 document.getElementById("g2rgb").innerHTML = arr3ToString(lrgb.rgb());
