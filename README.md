@@ -6,7 +6,13 @@ BetterGradient is a small test-bed for generating better looking gradients by co
 
 * Download the [test.html](https://github.com/Xankill3r/BetterGradient/archive/master.zip) file and open it in your browser.
 
-* Simply choose the colors by clicking on the boxes and three sets of gradients will get generated - RGB, linear RGB and LCH.
+* Simply choose the colors by clicking on the boxes and these sets of gradients will get generated
+  * RGB mix
+  * Linear RGB mix
+  * LAB mix
+  * LCH mix
+  * Subtle LCH mix (uses a bunch of Gauss curves)
+  * RGB LCH blend mix (blends between RGB and LCH based on hue difference)
 
 * Hovering anywhere within the gradients will show a comparison between these values.
 

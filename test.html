@@ -42,7 +42,7 @@
                     subtleLchCtx.fillRect(i, 0, 1, 80);
                     labCtx.fillStyle = labScaler(i / 400.0).hex();
                     labCtx.fillRect(i, 0, 1, 80);
-                    avgCtx.fillStyle = chroma.mix(lchCtx.fillStyle, rgbCtx.fillStyle, 0.5, "lab").hex();
+                    avgCtx.fillStyle = rgbLCHBlend(rgbScaler, lchScaler, i / 400.0).hex();
                     avgCtx.fillRect(i, 0, 1, 80);
                 }
             }
@@ -66,6 +66,24 @@
                 distance /= 180.0;
                 return dToWeightScale * distanceToWeightCurve.pdf(1 - distance);
             }
+            function rgbLCHBlend(rgbScaler, lchScaler, t) {
+                var start = lchScaler(0);
+                var end = lchScaler(1);
+                var hueDistance = Math.abs(start.lch()[2] - end.lch()[2]);
+                if (hueDistance > 180) hueDistance = 360 - hueDistance;
+                var blendWeight = rgbLCHBlendWeight(hueDistance);
+                var rawLCH = lchScaler(t).hex();
+                var rawRGB = rgbScaler(t).hex();
+                return chroma.mix(rawLCH, rawRGB, blendWeight, "lab");
+            }
+            var rgbLCHWeightCurve = gaussian(0, 0.005);
+            var rgbLCHWeightPeak = 0.4;
+            var rgbLCHWeightScale = (1 / rgbLCHWeightCurve.pdf(0)) * rgbLCHWeightPeak;
+            function rgbLCHBlendWeight(hueDistance) {
+                hueDistance /= 180.0;
+                return rgbLCHWeightScale * rgbLCHWeightCurve.pdf(1 - hueDistance);
+            }
+            //function rgbLCHBlend
             var subtleLumaCurve = gaussian(0, 0.6);
             var subtleLumaMin = subtleLumaCurve.pdf(1);
             var subtleLumaScale = 1 / (subtleLumaCurve.pdf(0) - subtleLumaMin);
@@ -99,7 +117,7 @@
                 var lch = lchScaler(x / 400.0);
                 var subtle = subtleLch(lchScaler, x / 400.0);
                 var lab = labScaler(x / 400.0);
-                var avg = chroma.mix(lch.hex(), rgb.hex(), 0.5, "lch");
+                var avg = rgbLCHBlend(rgbScaler, lchScaler, x / 400.0);
                 document.getElementById("g1rgb").innerHTML = arr3ToString(rgb.rgb());
                 document.getElementById("g1lch").innerHTML = arr3ToString(rgb.lch());
                 document.getElementById("g2rgb").innerHTML = arr3ToString(lrgb.rgb());
@@ -127,11 +145,11 @@
             <table id="inputs">
                 <tr>
                     <td class="label">Color 1</td>
-                    <td><input id="c1" value="#00ff00" type="color" onchange="updateGradient()" oninput="updateGradient()"/></td>
+                    <td><input id="c1" value="#3a4efc" type="color" onchange="updateGradient()" oninput="updateGradient()"/></td>
                 </tr>
                 <tr>
                     <td class="label">Color 2</td>
-                    <td><input id="c2" value="#ff00ff" type="color" onchange="updateGradient()"/></td>
+                    <td><input id="c2" value="#fd6492" type="color" onchange="updateGradient()" oninput="updateGradient()"/></td>
                 </tr>
             </table>
             <br/>
@@ -173,7 +191,7 @@
                     <td id="g4lch"></td>
                 </tr>
                 <tr>
-                    <td class="label">RGB Lch Avg</td>
+                    <td class="label">RGB LCH Blend</td>
                     <td><canvas id="gradient6" width="400" height="40" onpointermove="compareColors(event)"></canvas></td>
                     <td id="g6rgb"></td>
                     <td id="g6lch"></td>
