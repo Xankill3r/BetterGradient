@@ -1,35 +1,76 @@
 var rgbScaler, rgbLinScaler, lchScaler, labScaler;
 var color1, color2;
 var rgbCtx, rgbLinCtx, lchCtx, subtleLchCtx, labCtx, avgCtx;
+var g1RGBGraph, g1LCHGraph;
+var g2RGBGraph, g2LCHGraph;
+var g3RGBGraph, g3LCHGraph;
+var g4RGBGraph, g4LCHGraph;
+var g5RGBGraph, g5LCHGraph;
+var g6RGBGraph, g6LCHGraph;
 function updateGradient() {
     rgbScaler = chroma.scale([color1.value, color2.value]);
     rgbLinScaler = chroma.scale([color1.value, color2.value]).mode("lrgb");
     lchScaler = chroma.scale([color1.value, color2.value]).mode("lch");
     labScaler = chroma.scale([color1.value, color2.value]).mode("lab");
+    rgbCtx.clearRect(0, 0, 400, 40);
+    rgbLinCtx.clearRect(0, 0, 400, 40);
+    lchCtx.clearRect(0, 0, 400, 40);
+    subtleLchCtx.clearRect(0, 0, 400, 40);
+    labCtx.clearRect(0, 0, 400, 40);
+    avgCtx.clearRect(0, 0, 400, 40);
+
+    g1LCHGraph.clearRect(0, 0, 420, 120);
+    g1RGBGraph.clearRect(0, 0, 420, 120);
+    g2LCHGraph.clearRect(0, 0, 420, 120);
+    g2RGBGraph.clearRect(0, 0, 420, 120);
+    g3LCHGraph.clearRect(0, 0, 420, 120);
+    g3RGBGraph.clearRect(0, 0, 420, 120);
+    g4LCHGraph.clearRect(0, 0, 420, 120);
+    g4RGBGraph.clearRect(0, 0, 420, 120);
+    g5LCHGraph.clearRect(0, 0, 420, 120);
+    g5RGBGraph.clearRect(0, 0, 420, 120);
+    g6LCHGraph.clearRect(0, 0, 420, 120);
+    g6RGBGraph.clearRect(0, 0, 420, 120);
     for (var i = 0; i < 400; i++) {
-        rgbCtx.fillStyle = rgbScaler(i / 400.0).hex();
-        rgbCtx.fillRect(i, 0, 1, 80);
-        rgbLinCtx.fillStyle = rgbLinScaler(i / 400.0).hex();
-        rgbLinCtx.fillRect(i, 0, 1, 80);
-        lchCtx.fillStyle = lchScaler(i / 400.0).hex();
-        lchCtx.fillRect(i, 0, 1, 80);
-        subtleLchCtx.fillStyle = subtleLch(lchScaler, i / 400.0).hex();
-        subtleLchCtx.fillRect(i, 0, 1, 80);
-        labCtx.fillStyle = labScaler(i / 400.0).hex();
-        labCtx.fillRect(i, 0, 1, 80);
-        avgCtx.fillStyle = rgbLCHBlend(rgbScaler, lchScaler, i / 400.0).hex();
-        avgCtx.fillRect(i, 0, 1, 80);
+        updateOutput(rgbCtx, g1RGBGraph, g1LCHGraph, rgbScaler(i / 400.0), i);
+        updateOutput(rgbLinCtx, g2RGBGraph, g2LCHGraph, rgbLinScaler(i / 400.0), i);
+        updateOutput(lchCtx, g3RGBGraph, g3LCHGraph, lchScaler(i / 400.0), i);
+        updateOutput(subtleLchCtx, g4RGBGraph, g4LCHGraph, subtleLch(lchScaler, i / 400.0), i);
+        updateOutput(labCtx, g5RGBGraph, g5LCHGraph, labScaler(i / 400.0), i);
+        updateOutput(avgCtx, g6RGBGraph, g6LCHGraph, rgbLCHBlend(rgbScaler, lchScaler, i / 400.0), i);
     }
 }
+function updateOutput(colorCtx, rgbGraphCtx, lchGraphCtx, color, x) {
+    // Gradient
+    colorCtx.fillStyle = color.hex();
+    colorCtx.fillRect(x, 0, 1, 80);
+    // RGB Graph
+    var rgbVal = color.rgb();
+    rgbGraphCtx.fillStyle = "#ff0000";
+    rgbGraphCtx.fillRect(x + 10, (1 - (rgbVal[0] / 255.0)) * 100 + 10, 1, 1);
+    rgbGraphCtx.fillStyle = "#00ff00";
+    rgbGraphCtx.fillRect(x + 10, (1 - (rgbVal[1] / 255.0)) * 100 + 10, 1, 1);
+    rgbGraphCtx.fillStyle = "#0000ff";
+    rgbGraphCtx.fillRect(x + 10, (1 - (rgbVal[2] / 255.0)) * 100 + 10, 1, 1);
+    // LCH Graph
+    var lchVal = color.lch();
+    lchGraphCtx.fillStyle = "#000000";
+    lchGraphCtx.fillRect(x + 10, (1 - (lchVal[0] / 100.0)) * 100 + 10, 1, 1);
+    lchGraphCtx.fillStyle = "#aaaa00";
+    lchGraphCtx.fillRect(x + 10, (1 - (lchVal[1] / 100.0)) * 100 + 10, 1, 1);
+    lchGraphCtx.fillStyle = "#ff00ff";
+    lchGraphCtx.fillRect(x + 10, (1 - (lchVal[2] / 360.0)) * 100 + 10, 1, 1);
+}
 
-function lerp(a, b, t) {
-    return a + (b - a) * t;
+function lerp(v0, v1, t) {
+    return (1 - t) * v0 + t * v1;
 }
 
 function rgbLCHBlend(rgbScaler, lchScaler, t) {
     var start = lchScaler(0);
     var end = lchScaler(1);
     var hueDistance = Math.abs(start.lch()[2] - end.lch()[2]);
+    if (isNaN(hueDistance)) hueDistance = 0;
     if (hueDistance > 180) hueDistance = 360 - hueDistance;
     var blendWeight = rgbLCHBlendWeight(hueDistance);
     var rawLCH = lchScaler(t).hex();
@@ -49,6 +90,7 @@ function subtleLch(scaler, t) {
     var end = scaler(1);
     var raw = scaler(t).lch();
     var hueDistance = Math.abs(start.lch()[2] - end.lch()[2]);
+    if (isNaN(hueDistance)) hueDistance = 0;
     if (hueDistance > 180) hueDistance = 360 - hueDistance;
     var weight = hueDistanceToWeight(hueDistance);
     var l = subtleLuma(raw[0], weight, t);
@@ -125,6 +167,19 @@ function init() {
     subtleLchCtx = document.getElementById("gradient4").getContext("2d");
     labCtx = document.getElementById("gradient5").getContext("2d");
     avgCtx = document.getElementById("gradient6").getContext("2d");
+    
+    g1RGBGraph = document.getElementById("g1rgbGraph").getContext("2d");
+    g1LCHGraph = document.getElementById("g1lchGraph").getContext("2d");
+    g2RGBGraph = document.getElementById("g2rgbGraph").getContext("2d");
+    g2LCHGraph = document.getElementById("g2lchGraph").getContext("2d");
+    g3RGBGraph = document.getElementById("g3rgbGraph").getContext("2d");
+    g3LCHGraph = document.getElementById("g3lchGraph").getContext("2d");
+    g4RGBGraph = document.getElementById("g4rgbGraph").getContext("2d");
+    g4LCHGraph = document.getElementById("g4lchGraph").getContext("2d");
+    g5RGBGraph = document.getElementById("g5rgbGraph").getContext("2d");
+    g5LCHGraph = document.getElementById("g5lchGraph").getContext("2d");
+    g6RGBGraph = document.getElementById("g6rgbGraph").getContext("2d");
+    g6LCHGraph = document.getElementById("g6lchGraph").getContext("2d");
 
     g1rgb = document.getElementById("g1rgb");
     g1lch = document.getElementById("g1lch");
