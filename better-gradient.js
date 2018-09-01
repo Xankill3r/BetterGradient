@@ -72,7 +72,7 @@ class RGBLCHBlendScaler {
     constructor(colors) {
         // Gauss curve
         this.rgbLCHWeightCurve = gaussian(0, 0.005);
-        var rgbLCHWeightPeak = 0.65;
+        var rgbLCHWeightPeak = 0.9;
         this.rgbLCHWeightScale = (1 / this.rgbLCHWeightCurve.pdf(0)) * rgbLCHWeightPeak;
         // Scalers
         this.rgbScaler = chroma.scale(colors);
