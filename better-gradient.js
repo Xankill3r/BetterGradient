@@ -1,4 +1,4 @@
-var rgbScaler, rgbLinScaler, lchScaler, labScaler;
+var rgbScaler, rgbLinScaler, lchScaler, labScaler, rgbLCHBlendScaler, subtleLCHScaler;
 var color1, color2;
 var rgbCtx, rgbLinCtx, lchCtx, subtleLchCtx, labCtx, avgCtx;
 var g1RGBGraph, g1LCHGraph;
@@ -12,6 +12,8 @@ function updateGradient() {
     rgbLinScaler = chroma.scale([color1.value, color2.value]).mode("lrgb");
     lchScaler = chroma.scale([color1.value, color2.value]).mode("lch");
     labScaler = chroma.scale([color1.value, color2.value]).mode("lab");
+    rgbLCHBlendScaler = new RGBLCHBlendScaler([color1.value, color2.value]);
+    subtleLCHScaler = new SubtleLCHScaler([color1.value, color2.value]);
     rgbCtx.clearRect(0, 0, 400, 40);
     rgbLinCtx.clearRect(0, 0, 400, 40);
     lchCtx.clearRect(0, 0, 400, 40);
@@ -35,9 +37,9 @@ function updateGradient() {
         updateOutput(rgbCtx, g1RGBGraph, g1LCHGraph, rgbScaler(i / 400.0), i);
         updateOutput(rgbLinCtx, g2RGBGraph, g2LCHGraph, rgbLinScaler(i / 400.0), i);
         updateOutput(lchCtx, g3RGBGraph, g3LCHGraph, lchScaler(i / 400.0), i);
-        updateOutput(subtleLchCtx, g4RGBGraph, g4LCHGraph, subtleLch(lchScaler, i / 400.0), i);
+        updateOutput(subtleLchCtx, g4RGBGraph, g4LCHGraph, subtleLCHScaler.blend(i / 400.0), i);
         updateOutput(labCtx, g5RGBGraph, g5LCHGraph, labScaler(i / 400.0), i);
-        updateOutput(avgCtx, g6RGBGraph, g6LCHGraph, rgbLCHBlend(rgbScaler, lchScaler, i / 400.0), i);
+        updateOutput(avgCtx, g6RGBGraph, g6LCHGraph, rgbLCHBlendScaler.blend(i / 400.0), i);
     }
 }
 function updateOutput(colorCtx, rgbGraphCtx, lchGraphCtx, color, x) {
@@ -66,64 +68,71 @@ function lerp(v0, v1, t) {
     return (1 - t) * v0 + t * v1;
 }
 
-function rgbLCHBlend(rgbScaler, lchScaler, t) {
-    var start = lchScaler(0);
-    var end = lchScaler(1);
-    var hueDistance = Math.abs(start.lch()[2] - end.lch()[2]);
-    if (isNaN(hueDistance)) hueDistance = 0;
-    if (hueDistance > 180) hueDistance = 360 - hueDistance;
-    var blendWeight = rgbLCHBlendWeight(hueDistance);
-    var rawLCH = lchScaler(t).hex();
-    var rawRGB = rgbScaler(t).hex();
-    return chroma.mix(rawLCH, rawRGB, blendWeight, "lab");
-}
-var rgbLCHWeightCurve = gaussian(0, 0.005);
-var rgbLCHWeightPeak = 0.4;
-var rgbLCHWeightScale = (1 / rgbLCHWeightCurve.pdf(0)) * rgbLCHWeightPeak;
-function rgbLCHBlendWeight(hueDistance) {
-    hueDistance /= 180.0;
-    return rgbLCHWeightScale * rgbLCHWeightCurve.pdf(1 - hueDistance);
+class RGBLCHBlendScaler {
+    constructor(colors) {
+        // Gauss curve
+        this.rgbLCHWeightCurve = gaussian(0, 0.005);
+        var rgbLCHWeightPeak = 0.65;
+        this.rgbLCHWeightScale = (1 / this.rgbLCHWeightCurve.pdf(0)) * rgbLCHWeightPeak;
+        // Scalers
+        this.rgbScaler = chroma.scale(colors);
+        this.lchScaler = chroma.scale(colors).mode("lch");
+        var start = this.lchScaler(0);
+        var end = this.lchScaler(1);
+        var hueDistance = Math.abs(start.lch()[2] - end.lch()[2]);
+        if (isNaN(hueDistance)) hueDistance = 0;
+        if (hueDistance > 180) hueDistance = 360 - hueDistance;
+        this.blendWeight = this.rgbLCHBlendWeight(hueDistance);
+    }
+    blend(t) {
+        var rawLCH = this.lchScaler(t).hex();
+        var rawRGB = this.rgbScaler(t).hex();
+        return chroma.mix(rawLCH, rawRGB, this.blendWeight, "lab");
+    }
+    rgbLCHBlendWeight(hueDistance) {
+        hueDistance /= 180.0;
+        return this.rgbLCHWeightScale * this.rgbLCHWeightCurve.pdf(1 - hueDistance);
+    }
 }
 
-function subtleLch(scaler, t) {
-    var start = scaler(0);
-    var end = scaler(1);
-    var raw = scaler(t).lch();
-    var hueDistance = Math.abs(start.lch()[2] - end.lch()[2]);
-    if (isNaN(hueDistance)) hueDistance = 0;
-    if (hueDistance > 180) hueDistance = 360 - hueDistance;
-    var weight = hueDistanceToWeight(hueDistance);
-    var l = subtleLuma(raw[0], weight, t);
-    var c = subtleChroma(raw[1], weight, t);
-    return chroma(l, c, raw[2], "lch");
-}
-var distanceToWeightCurve = gaussian(0, 0.01);
-var dToWeightScale = (1 / distanceToWeightCurve.pdf(0)) * 0.65;
-function hueDistanceToWeight(distance) {
-    distance /= 180.0;
-    return dToWeightScale * distanceToWeightCurve.pdf(1 - distance);
-}
-var subtleLumaCurve = gaussian(0, 0.6);
-var subtleLumaMin = subtleLumaCurve.pdf(1);
-var subtleLumaScale = 1 / (subtleLumaCurve.pdf(0) - subtleLumaMin);
-/**
- * Calculates subtle Luma value from the raw value at location t [0, 1] along the gradient
- */
-function subtleLuma(raw, weight, t) {
-    t = subtleLumaScale * (subtleLumaCurve.pdf(t * 2 - 1) - subtleLumaMin);
-    t = weight * t * 0.2;
-    return lerp(raw, 0, t);
-}
-var subtleChromaCurve = gaussian(0, 0.8);
-var subtleChromaMin = subtleChromaCurve.pdf(1);
-var subtleChromaScale = 1 / (subtleChromaCurve.pdf(0) - subtleChromaMin);
-/**
- * Calculates subtle Chroma value from the raw value at location t [0, 1] along the gradient
- */
-function subtleChroma(raw, weight, t) {
-    t = subtleChromaScale * (subtleChromaCurve.pdf(t * 2 - 1) - subtleChromaMin);
-    t = weight * t * 1;
-    return lerp(raw, 0, t);
+class SubtleLCHScaler {
+    constructor(colors) {
+        // Luma Gauss curve
+        this.subtleLumaCurve = gaussian(0, 0.6);
+        this.subtleLumaMin = this.subtleLumaCurve.pdf(1);
+        this.subtleLumaScale = 1 / (this.subtleLumaCurve.pdf(0) - this.subtleLumaMin);
+        // Chroma Gauss curve
+        this.subtleChromaCurve = gaussian(0, 0.8);
+        this.subtleChromaMin = this.subtleChromaCurve.pdf(1);
+        this.subtleChromaScale = 1 / (this.subtleChromaCurve.pdf(0) - this.subtleChromaMin);
+        // Scaler
+        this.lchScaler = chroma.scale(colors).mode("lch");
+        var start = this.lchScaler(0);
+        var end = this.lchScaler(1);
+        var hueDistance = Math.abs(start.lch()[2] - end.lch()[2]);
+        if (isNaN(hueDistance)) hueDistance = 0;
+        if (hueDistance > 180) hueDistance = 360 - hueDistance;
+        hueDistance /= 180.0;
+        var distanceToWeightCurve = gaussian(0, 0.01);
+        var dToWeightScale = (1 / distanceToWeightCurve.pdf(0)) * 0.65;
+        this.blendWeight = dToWeightScale * distanceToWeightCurve.pdf(1 - hueDistance);
+    }
+    blend(t) {
+        var raw = this.lchScaler(t).lch();
+        var l = this.subtleLuma(raw[0], this.blendWeight, t);
+        var c = this.subtleChroma(raw[1], this.blendWeight, t);
+        return chroma(l, c, raw[2], "lch");
+    }
+    subtleLuma(raw, weight, t) {
+        t = this.subtleLumaScale * (this.subtleLumaCurve.pdf(t * 2 - 1) - this.subtleLumaMin);
+        t = weight * t * 0.2;
+        return lerp(raw, 0, t);
+    }
+    subtleChroma(raw, weight, t) {
+        t = this.subtleChromaScale * (this.subtleChromaCurve.pdf(t * 2 - 1) - this.subtleChromaMin);
+        t = weight * t * 1;
+        return lerp(raw, 0, t);
+    }
 }
 
 var g1rgb, g1lch, g2rgb, g2lch, g3rgb, g3lch, g4rgb, g4lch, g5rgb, g5lch, g6rgh, g6lch;
@@ -134,9 +143,9 @@ function compareColors(ev) {
     var rgb = rgbScaler(x / 400.0);
     var lrgb = rgbLinScaler(x / 400.0);
     var lch = lchScaler(x / 400.0);
-    var subtle = subtleLch(lchScaler, x / 400.0);
+    var subtle = subtleLCHScaler.blend(x / 400.0);
     var lab = labScaler(x / 400.0);
-    var avg = rgbLCHBlend(rgbScaler, lchScaler, x / 400.0);
+    var avg = rgbLCHBlendScaler.blend(x / 400.0);
     g1rgb.innerHTML = arr3ToString(rgb.rgb());
     g1lch.innerHTML = arr3ToString(rgb.lch());
     g2rgb.innerHTML = arr3ToString(lrgb.rgb());
