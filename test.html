@@ -24,11 +24,11 @@
             <table id="inputs">
                 <tr>
                     <td class="label">Color 1</td>
-                    <td><input id="c1" value="#3a4efc" type="color" onchange="updateGradient()" oninput="updateGradient()"/></td>
+                    <td><input id="c1" value="#3a4efc" type="color"/></td>
                 </tr>
                 <tr>
                     <td class="label">Color 2</td>
-                    <td><input id="c2" value="#fffd60" type="color" onchange="updateGradient()" oninput="updateGradient()"/></td>
+                    <td><input id="c2" value="#fffd60" type="color"/></td>
                 </tr>
             </table>
             <br/>
@@ -45,49 +45,65 @@
                     <td class="label">RGB Gradient</td>
                     <td><canvas id="gradient1" width="400" height="40" onpointermove="compareColors(event)"></canvas></td>
                     <td id="g1rgb"></td>
-                    <td><canvas id="g1rgbGraph" width="420" height="120"></canvas></td>
+                    <td><canvas id="g1rgbGraph" width="420" height="100"></canvas></td>
                     <td id="g1lch"></td>
-                    <td><canvas id="g1lchGraph" width="420" height="120"></canvas></td>
+                    <td><canvas id="g1lchGraph" width="420" height="100"></canvas></td>
                 </tr>
                 <tr>
                     <td class="label">lRGB Gradient</td>
                     <td><canvas id="gradient2" width="400" height="40" onpointermove="compareColors(event)"></canvas></td>
                     <td id="g2rgb"></td>
-                    <td><canvas id="g2rgbGraph" width="420" height="120"></canvas></td>
+                    <td><canvas id="g2rgbGraph" width="420" height="100"></canvas></td>
                     <td id="g2lch"></td>
-                    <td><canvas id="g2lchGraph" width="420" height="120"></canvas></td>
+                    <td><canvas id="g2lchGraph" width="420" height="100"></canvas></td>
                 </tr>
                 <tr>
                     <td class="label">Lab Gradient</td>
                     <td><canvas id="gradient5" width="400" height="40" onpointermove="compareColors(event)"></canvas></td>
                     <td id="g5rgb"></td>
-                    <td><canvas id="g5rgbGraph" width="420" height="120"></canvas></td>
+                    <td><canvas id="g5rgbGraph" width="420" height="100"></canvas></td>
                     <td id="g5lch"></td>
-                    <td><canvas id="g5lchGraph" width="420" height="120"></canvas></td>
+                    <td><canvas id="g5lchGraph" width="420" height="100"></canvas></td>
                 </tr>
                 <tr>
                     <td class="label">Lch Gradient</td>
                     <td><canvas id="gradient3" width="400" height="40" onpointermove="compareColors(event)"></canvas></td>
                     <td id="g3rgb"></td>
-                    <td><canvas id="g3rgbGraph" width="420" height="120"></canvas></td>
+                    <td><canvas id="g3rgbGraph" width="420" height="100"></canvas></td>
                     <td id="g3lch"></td>
-                    <td><canvas id="g3lchGraph" width="420" height="120"></canvas></td>
+                    <td><canvas id="g3lchGraph" width="420" height="100"></canvas></td>
+                </tr>
+                <tr>
+                    <td class="label">LCH Approx</td>
+                    <td><canvas id="gradient7" width="400" height="40" onpointermove="compareColors(event)"></canvas></td>
+                    <td id="g7rgb"></td>
+                    <td><canvas id="g7rgbGraph" width="420" height="100"></canvas></td>
+                    <td id="g7lch"></td>
+                    <td><canvas id="g7lchGraph" width="420" height="100"></canvas></td>
                 </tr>
                 <tr>
                     <td class="label">Subtle Lch Gradient</td>
                     <td><canvas id="gradient4" width="400" height="40" onpointermove="compareColors(event)"></canvas></td>
                     <td id="g4rgb"></td>
-                    <td><canvas id="g4rgbGraph" width="420" height="120"></canvas></td>
+                    <td><canvas id="g4rgbGraph" width="420" height="100"></canvas></td>
                     <td id="g4lch"></td>
-                    <td><canvas id="g4lchGraph" width="420" height="120"></canvas></td>
+                    <td><canvas id="g4lchGraph" width="420" height="100"></canvas></td>
                 </tr>
                 <tr>
                     <td class="label">RGB LCH Blend</td>
                     <td><canvas id="gradient6" width="400" height="40" onpointermove="compareColors(event)"></canvas></td>
                     <td id="g6rgb"></td>
-                    <td><canvas id="g6rgbGraph" width="420" height="120"></canvas></td>
+                    <td><canvas id="g6rgbGraph" width="420" height="100"></canvas></td>
                     <td id="g6lch"></td>
-                    <td><canvas id="g6lchGraph" width="420" height="120"></canvas></td>
+                    <td><canvas id="g6lchGraph" width="420" height="100"></canvas></td>
+                </tr>
+                <tr>
+                    <td class="label">RGB LCH Blend Approx</td>
+                    <td><canvas id="gradient8" width="400" height="40" onpointermove="compareColors(event)"></canvas></td>
+                    <td id="g8rgb"></td>
+                    <td><canvas id="g8rgbGraph" width="420" height="100"></canvas></td>
+                    <td id="g8lch"></td>
+                    <td><canvas id="g8lchGraph" width="420" height="100"></canvas></td>
                 </tr>
             </table>
         </div>
