@@ -2,7 +2,9 @@
 
 BetterGradient is a small test-bed for generating better looking gradients by converting to the LCH colorspace. It may eventually be used as a plugin within Unity3D, GIMP, Krita, Photoshop, etc.
 
-### Usage
+### [Wiki](https://github.com/Xankill3r/BetterGradient/wiki)
+
+### Testing
 
 * Browse to [the test page](https://xankill3r.github.io/BetterGradient/).
 
