@@ -17,20 +17,30 @@ namespace BetterGradient
             GetWindow<BetterGradientGenerator>();
         }
 
+        GradientField inputGradientField;
         Gradient input;
-        GradientField inputField;
-        GradientColorKey[] inputColorKeys = new GradientColorKey[] { new GradientColorKey(Color.red, 0), new GradientColorKey(Color.blue, 1) };
-        GradientAlphaKey[] inputAlphaKeys = new GradientAlphaKey[] { new GradientAlphaKey(1, 1), new GradientAlphaKey(1, 1) };
+
         VisualElement outputGradientTexture;
         Texture2D gradientTexture;
         Color[] gradientColors;
+
+        GradientField outputGradientField;
+        Gradient approxOutput;
+        List<GradientColorKey> approxColorKeys = new List<GradientColorKey>(8);
+        List<GradientAlphaKey> approxAlphaKeys = new List<GradientAlphaKey>(8);
 
         public void OnEnable()
         {
             if (input == null)
             {
                 input = new Gradient();
-                input.SetKeys(inputColorKeys, inputAlphaKeys);
+                input.SetKeys(
+                    new GradientColorKey[] { new GradientColorKey(Color.red, 0), new GradientColorKey(Color.blue, 1) }
+                    , new GradientAlphaKey[] { new GradientAlphaKey(1, 1) });
+            }
+            if (approxOutput == null)
+            {
+                approxOutput = new Gradient();
             }
             if (gradientTexture == null)
             {
@@ -50,7 +60,6 @@ namespace BetterGradient
                     backgroundColor = new Color(0.3f, 0.3f, 0.3f),
                 }
             };
-            // Label
             inputContainer.Add(new Label()
             {
                 text = "Input Gradient",
@@ -61,8 +70,7 @@ namespace BetterGradient
                     width = 140
                 }
             });
-            // GradientField
-            inputField = new GradientField()
+            inputGradientField = new GradientField()
             {
                 value = input,
                 style =
@@ -72,10 +80,10 @@ namespace BetterGradient
                     flexGrow = 1
                 }
             };
-            inputContainer.Add(inputField);
+            inputContainer.Add(inputGradientField);
             root.Add(inputContainer);
 
-            root.Add(new Button(() => { ConvertToTexture(BetterGradient.GradientMode.RGB); })
+            root.Add(new Button(() => { ConvertToTexture(GradientMode.RGB); })
             {
                 text = "Convert (RGB)",
                 style =
@@ -84,9 +92,9 @@ namespace BetterGradient
                     fontStyle = FontStyle.Bold
                 }
             });
-            root.Add(new Button(() => { ConvertToTexture(BetterGradient.GradientMode.LChuv); })
+            root.Add(new Button(() => { ConvertToTexture(GradientMode.LChuv); })
             {
-                text = "Convert (LChuv)",
+                text = "Convert (LChuv) + Approximate",
                 style =
                 {
                     fontSize = 12,
@@ -94,7 +102,7 @@ namespace BetterGradient
                 }
             });
 
-            var outputContainer = new VisualElement()
+            var outputTexContainer = new VisualElement()
             {
                 style =
                 {
@@ -104,8 +112,7 @@ namespace BetterGradient
                     backgroundColor = new Color(0.3f, 0.3f, 0.3f),
                 }
             };
-            // Label
-            outputContainer.Add(new Label()
+            outputTexContainer.Add(new Label()
             {
                 text = "Output Texture",
                 style =
@@ -127,8 +134,8 @@ namespace BetterGradient
                     height = 30
                 }
             };
-            outputContainer.Add(outputGradientTexture);
-            outputContainer.Add(new Button(() => { SaveTexture(outputGradientTexture.style.backgroundImage.value); })
+            outputTexContainer.Add(outputGradientTexture);
+            outputTexContainer.Add(new Button(() => { SaveTexture(outputGradientTexture.style.backgroundImage.value); })
             {
                 text = "Save",
                 style =
@@ -137,13 +144,46 @@ namespace BetterGradient
                     fontStyle = FontStyle.Bold
                 }
             });
-            root.Add(outputContainer);
+            root.Add(outputTexContainer);
+
+            var outputApproxGradientContainer = new VisualElement()
+            {
+                style =
+                {
+                    marginTop = 6,
+                    marginBottom = 6,
+                    flexDirection = FlexDirection.Row,
+                    backgroundColor = new Color(0.3f, 0.3f, 0.3f),
+                }
+            };
+            outputApproxGradientContainer.Add(new Label()
+            {
+                text = "Output Approx. Gradient",
+                style =
+                {
+                    fontSize = 12,
+                    fontStyle = FontStyle.Bold,
+                    width = 140
+                }
+            });
+            outputGradientField = new GradientField()
+            {
+                value = approxOutput,
+                style =
+                {
+                    fontSize = 20,
+                    fontStyle = FontStyle.Bold,
+                    flexGrow = 1
+                }
+            };
+            outputApproxGradientContainer.Add(outputGradientField);
+            root.Add(outputApproxGradientContainer);
         }
 
-        private void ConvertToTexture(BetterGradient.GradientMode mode)
+        private void ConvertToTexture(GradientMode mode)
         {
-            var colorKeys = inputField.value.colorKeys;
-            var alphaKeys = inputField.value.alphaKeys;
+            var colorKeys = inputGradientField.value.colorKeys;
+            var alphaKeys = inputGradientField.value.alphaKeys;
 
             var colors = new Color[colorKeys.Length];
             var colorKeyLocations = new float[colorKeys.Length];
@@ -161,10 +201,14 @@ namespace BetterGradient
                 alphaKeyLocations[i] = alphaKeys[i].time;
             }
 
-            BetterGradient.GradientToColors(colors, colorKeyLocations, alphas, alphaKeyLocations, ref gradientColors, mode);
+            BetterGradient.GradientToColors(colors, colorKeyLocations, alphas, alphaKeyLocations, gradientColors, mode);
             gradientTexture.SetPixels(gradientColors);
             gradientTexture.Apply();
             outputGradientTexture.style.backgroundImage = gradientTexture;
+
+            var error = BetterGradient.ApproximateColorArrayAsGradient(gradientColors, approxOutput, approxColorKeys, approxAlphaKeys);
+            Debug.Log(error);
+            outputGradientField.value = approxOutput;
         }
 
         private void SaveTexture(Texture2D texture)
