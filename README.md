@@ -4,6 +4,8 @@ BetterGradient generates better looking gradients by converting to the LChuv col
 
 ### [Wiki](https://github.com/Xankill3r/BetterGradient/wiki)
 
+### [Unity3D Package](https://github.com/Xankill3r/BetterGradient/releases/latest)
+
 ### Testing
 
 * Browse to [the test page](https://xankill3r.github.io/BetterGradient/).
