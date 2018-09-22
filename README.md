@@ -2,9 +2,9 @@
 
 BetterGradient generates better looking gradients by converting to the LChuv colorspace. Plugin for Unity3D is available. Plugins for GIMP, Krita, Photoshop, etc coming soon.
 
-### [Wiki](https://github.com/Xankill3r/BetterGradient/wiki)
-
 ### [Unity3D Package](https://github.com/Xankill3r/BetterGradient/releases/latest)
+
+### [Wiki](https://github.com/Xankill3r/BetterGradient/wiki)
 
 ### Testing
 
