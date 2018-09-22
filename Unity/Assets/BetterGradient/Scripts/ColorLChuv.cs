@@ -181,20 +181,7 @@ namespace BetterGradient
             // Hue
             if (!float.IsNaN(c0.H) && !float.IsNaN(c1.H))
             {
-                float dh;
-                if (c1.H > c0.H && c1.H - c0.H > 180f)
-                {
-                    dh = c1.H - (c0.H + 360f);
-                }
-                else if (c1.H < c0.H && c0.H - c1.H > 180f)
-                {
-                    dh = (c1.H + 360) - c0.H;
-                }
-                else
-                {
-                    dh = c1.H - c0.H;
-                }
-                h = c0.H + f * dh;
+                h = Mathf.LerpAngle(c0.H, c1.H, f);
             }
             else if (!float.IsNaN(c0.H))
             {
