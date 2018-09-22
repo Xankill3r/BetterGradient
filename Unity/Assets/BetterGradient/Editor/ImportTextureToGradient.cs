@@ -17,14 +17,22 @@ namespace BetterGradient
             GetWindow<ImportTextureToGradient>();
         }
 
-        Gradient output;
-        GradientField outputField;
+        Texture2D inputTexture;
+
+        Gradient approxOutput;
+        GradientField outputGradientField;
+        List<GradientColorKey> approxColorKeys = new List<GradientColorKey>(8);
+        List<GradientAlphaKey> approxAlphaKeys = new List<GradientAlphaKey>(8);
 
         public void OnEnable()
         {
-            if (output == null)
+            if (approxOutput == null)
             {
-                output = new Gradient();
+                approxOutput = new Gradient();
+            }
+            if (inputTexture == null)
+            {
+                inputTexture = Texture2D.whiteTexture;
             }
             var root = this.GetRootVisualContainer();
 
@@ -38,18 +46,18 @@ namespace BetterGradient
                     backgroundColor = new Color(0.3f, 0.3f, 0.3f),
                 }
             };
-            // Label
-            inputContainer.Add(new Label()
+            // Display Texture selector
+            root.Add(new IMGUIContainer(OnTextureSelectorGUI)
             {
-                text = "Input Texture",
                 style =
                 {
-                    fontSize = 12,
-                    fontStyle = FontStyle.Bold,
-                    width = 140
+                    width = 200,
+                    height = 50,
+                    marginLeft = 10,
+                    marginRight = 10,
+                    marginTop = 10
                 }
             });
-            // Todo : Display Texture selector
             root.Add(inputContainer);
 
             var button = new Button(ApproximateGradient)
@@ -85,9 +93,9 @@ namespace BetterGradient
                 }
             });
             // GradientField
-            outputField = new GradientField()
+            outputGradientField = new GradientField()
             {
-                value = output,
+                value = approxOutput,
                 style =
                 {
                     fontSize = 20,
@@ -95,12 +103,21 @@ namespace BetterGradient
                     flexGrow = 1
                 }
             };
-            outputContainer.Add(outputField);
+            outputContainer.Add(outputGradientField);
             root.Add(outputContainer);
+        }
+        void OnTextureSelectorGUI()
+        {
+            inputTexture = EditorGUILayout.ObjectField("Input Texture", inputTexture, typeof(Texture2D), false) as Texture2D;
         }
 
         private void ApproximateGradient()
         {
+            var gradientColors = inputTexture.GetPixels(0, 0, inputTexture.width, 1);
+
+            var error = BetterGradient.ApproximateColorArrayAsGradient(gradientColors, approxOutput, approxColorKeys, approxAlphaKeys);
+            Debug.Log(error);
+            outputGradientField.value = approxOutput;
         }
     }
 }
