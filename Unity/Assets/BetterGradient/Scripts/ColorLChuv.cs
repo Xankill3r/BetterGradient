@@ -7,9 +7,6 @@ namespace BetterGradient
 {
     public struct ColorLChuv
     {
-        private const float Gamma = 3f;
-        private const float AlphaScale = 1 / 100f;
-
         // Corresponds roughly to RGB brighter/darker
         private const float Kn = 18f;
 
@@ -136,21 +133,21 @@ namespace BetterGradient
             x = Xn * LabToXYZ(x);
             z = Zn * LabToXYZ(z);
 
-            var r = XYZToRGB(3.2404542f * x - 1.5371385f * y - 0.4985314f * z);
-            var g = XYZToRGB(-0.9692660f * x + 1.8760108f * y + 0.0415560f * z);
-            var b = XYZToRGB(0.0556434f * x - 0.2040259f * y + 1.0572252f * z);
+            var r = Mathf.Clamp01(XYZToRGB(3.2404542f * x - 1.5371385f * y - 0.4985314f * z));
+            var g = Mathf.Clamp01(XYZToRGB(-0.9692660f * x + 1.8760108f * y + 0.0415560f * z));
+            var b = Mathf.Clamp01(XYZToRGB(0.0556434f * x - 0.2040259f * y + 1.0572252f * z));
 
             return new Color(r, g, b, A / 255f);
         }
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         static float LabToXYZ(float t)
         {
-            return t > t1 ? t * t * t : t2 * (t - t0);
+            return t > t1 ? (t * t * t) : (t2 * (t - t0));
         }
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         static float XYZToRGB(float r)
         {
-            return r <= 0.00304f ? 12.92f * r : 1.055f * Mathf.Pow(r, 1 / 2.4f) - 0.055f;
+            return r <= 0.00304f ? (12.92f * r) : (1.055f * Mathf.Pow(r, 1 / 2.4f) - 0.055f);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -182,6 +179,7 @@ namespace BetterGradient
             if (!float.IsNaN(c0.H) && !float.IsNaN(c1.H))
             {
                 h = Mathf.LerpAngle(c0.H, c1.H, f);
+                h = h < 0 ? (h + 360f) % 360f : h;
             }
             else if (!float.IsNaN(c0.H))
             {
