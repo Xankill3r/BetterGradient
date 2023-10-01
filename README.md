@@ -1,6 +1,6 @@
 # BetterGradient
 
-BetterGradient generates better looking gradients by converting to the LChuv colorspace. Plugin for Unity3D is available. Plugins for GIMP, Krita, Photoshop, etc coming soon.
+BetterGradient generates better looking gradients by converting to the LChuv colorspace. OKLAB support to be added soon.
 
 ### [Unity3D Package](https://github.com/Xankill3r/BetterGradient/releases/latest)
 
@@ -22,7 +22,7 @@ BetterGradient generates better looking gradients by converting to the LChuv col
 
 ### Based on
 
-Currently uses the [Chrome.js](https://github.com/gka/chroma.js) library for proof of concept. Final versions (Photoshop, Unity, GIMP, etc) will be based on different code.
+Currently uses the [Chroma.js](https://github.com/gka/chroma.js) library for proof of concept. Final versions will be based on different code - hopefully optimized using intrinsics where possible.
 
 ### Author
 
